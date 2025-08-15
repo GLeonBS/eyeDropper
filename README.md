@@ -1,47 +1,69 @@
-# eyeDropper
+# React + TypeScript + Vite
 
-A simple eye dropper developed for a college assignment with the aim of creating a solution using at least 2 [Web APIs](https://developer.mozilla.org/en-US/docs/Web/API).
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Web APIs used
+Currently, two official plugins are available:
 
-1 - [EyeDropper API](https://developer.mozilla.org/en-US/docs/Web/API/EyeDropper_API) - Used to create a an eyedropper tool. Using this tool, users can sample colors from their screens, including outside of the browser window.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-2 - [Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API) - Used to store a most recent and previous color choice.
+## Expanding the ESLint configuration
 
-## Getting started
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
+```js
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### Installing
+      // Remove tseslint.configs.recommended and replace with this
+      ...tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      ...tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      ...tseslint.configs.stylisticTypeChecked,
 
-**Cloning the Repository**
-
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-$ git clone https://github.com/GLeonBS/ChooseColor.git
 
-$ cd eyeDropper
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-
-**Installing dependencies** 
-
-```
-$ npm i
-```
-
-## Running
-
-With all dependecies installed, you can now run the app: 
-
-```
-$ npm run dev
-```
-
-## Observations
-
-I'll be happy if you could provide me any feedback about the project helping me to be a better developer.
-
-Email-me: gabriel.leonbs@gmail.com
-
-Connect with me at [LinkedIn](https://www.linkedin.com/in/gabriel-leon-brugnolo-de-souza-688aa91a1/)
-
-Thank you!
