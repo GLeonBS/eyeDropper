@@ -1,19 +1,17 @@
 /// <reference types="vite/client" />
 
-interface ColorSelectionResult {
-    sRGBHex: string;
-  };
-  
-  
-  interface ColorSelectionOptions {
-    signal: AbortSignal;
-  };
-  
-  declare class EyeDropper {
-    constructor(options?: ColorSelectionOptions) {}
-  
-    open(): Promise<ColorSelectionResult>
+// Declarações para a API EyeDropper
+declare global {
+  interface Window {
+    EyeDropper: typeof EyeDropper;
   }
-interface Window {
-  EyeDropper: EyeDropper
+}
+
+interface EyeDropperResult {
+  sRGBHex: string;
+}
+
+declare class EyeDropper {
+  constructor();
+  open(): Promise<EyeDropperResult>;
 }
