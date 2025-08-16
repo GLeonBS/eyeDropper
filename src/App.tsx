@@ -148,51 +148,56 @@ function App() {
             </section>
           ) : null}
 
-          <div className="bg-gradient-to-r from-primary/20 to-secondary/20 border border-white/10 rounded-xl">
-            <section>
-              <h2 className="text-2xl font-semibold text-white text-center p-4">
-                {title}
-              </h2>
-            </section>
+          {!error ? (
+            <div className="bg-gradient-to-r from-primary/20 to-secondary/20 border border-white/10 rounded-xl">
+              <section>
+                <h2 className="text-2xl font-semibold text-white text-center p-4">
+                  {title}
+                </h2>
+              </section>
 
-            {showColors && (
-              <section className="mb-4 md:mb-8" aria-label="Cores selecionadas">
-                <div className="flex flex-row justify-center gap-3 md:gap-6">
-                  <article className="flex flex-col items-center">
-                    <h3 className="text-white text-lg">Cor atual:</h3>
-                    <div
-                      className="w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 border-primary/50 flex items-center justify-center shadow-lg shadow-primary/30"
-                      style={{
-                        backgroundColor: colors.current || "transparent",
-                      }}
-                      role="img"
-                      aria-label={`Cor atual: ${colors.current}`}
-                    >
-                      <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">
-                        {colors.current}
-                      </span>
-                    </div>
-                  </article>
-
-                  {colors.previous ? (
+              {showColors && (
+                <section
+                  className="mb-4 md:mb-8"
+                  aria-label="Cores selecionadas"
+                >
+                  <div className="flex flex-row justify-center gap-3 md:gap-6">
                     <article className="flex flex-col items-center">
-                      <h3 className="text-white text-lg">Cor anterior:</h3>
+                      <h3 className="text-white text-lg">Cor atual:</h3>
                       <div
-                        className="w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 border-secondary/50 flex items-center justify-center shadow-lg shadow-secondary/30"
-                        style={{ backgroundColor: colors.previous }}
+                        className="w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 border-primary/50 flex items-center justify-center shadow-lg shadow-primary/30"
+                        style={{
+                          backgroundColor: colors.current || "transparent",
+                        }}
                         role="img"
-                        aria-label={`Cor anterior: ${colors.previous}`}
+                        aria-label={`Cor atual: ${colors.current}`}
                       >
                         <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">
-                          {colors.previous}
+                          {colors.current}
                         </span>
                       </div>
                     </article>
-                  ) : null}
-                </div>
-              </section>
-            )}
-          </div>
+
+                    {colors.previous ? (
+                      <article className="flex flex-col items-center">
+                        <h3 className="text-white text-lg">Cor anterior:</h3>
+                        <div
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 border-secondary/50 flex items-center justify-center shadow-lg shadow-secondary/30"
+                          style={{ backgroundColor: colors.previous }}
+                          role="img"
+                          aria-label={`Cor anterior: ${colors.previous}`}
+                        >
+                          <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">
+                            {colors.previous}
+                          </span>
+                        </div>
+                      </article>
+                    ) : null}
+                  </div>
+                </section>
+              )}
+            </div>
+          ) : null}
 
           <footer className="text-center pt-3 md:pt-6 border-t border-white/10">
             <ButtonED
