@@ -12,13 +12,15 @@ interface ColorData {
 }
 
 function App() {
+  const isExtensionPopup = window.location.protocol === "chrome-extension:";
+
   const [colors, setColors] = useState<ColorData>({
     current: null,
     previous: null,
   });
   const [error, setError] = useState<string>("");
   const [title, setTitle] = useState<string>(
-    "Ainda não tem nenhuma cor selecionada :/"
+    "Ainda não tem nenhuma cor selecionada :/",
   );
   const [showColors, setShowColors] = useState<boolean>(false);
   const [isAnimatedBackground, setIsAnimatedBackground] =
@@ -94,27 +96,52 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center p-2 md:p-4 ${
-        isAnimatedBackground ? "animated-bg" : "black-bg"
-      }`}
+      className={`flex justify-center p-2 md:p-4 ${
+        isExtensionPopup
+          ? "w-full min-h-[560px] items-start"
+          : "min-h-screen items-center"
+      } ${isAnimatedBackground ? "animated-bg" : "black-bg"}`}
     >
-      <BackgroundSelector
-        isAnimatedBackground={isAnimatedBackground}
-        onBackgroundChange={handleBackgroundChange}
-      />
-
-      <MobileMenu>
-        <BackgroundSelectorContent
+      {!isExtensionPopup ? (
+        <BackgroundSelector
           isAnimatedBackground={isAnimatedBackground}
           onBackgroundChange={handleBackgroundChange}
         />
-      </MobileMenu>
+      ) : null}
 
-      <main className="w-full max-w-2xl bg-white/10 backdrop-blur-sm rounded-3xl p-4 md:p-8 shadow-2xl border border-white/20">
-        <article className="space-y-4">
+      {!isExtensionPopup ? (
+        <MobileMenu>
+          <BackgroundSelectorContent
+            isAnimatedBackground={isAnimatedBackground}
+            onBackgroundChange={handleBackgroundChange}
+          />
+        </MobileMenu>
+      ) : null}
+
+      <main
+        className={`w-full bg-white/10 backdrop-blur-sm shadow-2xl border border-white/20 ${
+          isExtensionPopup
+            ? "max-w-[380px] rounded-2xl p-3"
+            : "max-w-2xl rounded-3xl p-4 md:p-8"
+        }`}
+      >
+        <article className={isExtensionPopup ? "space-y-3" : "space-y-4"}>
+          {isExtensionPopup ? (
+            <section className="rounded-xl border border-white/20 bg-white/5 p-3">
+              <BackgroundSelectorContent
+                isAnimatedBackground={isAnimatedBackground}
+                onBackgroundChange={handleBackgroundChange}
+              />
+            </section>
+          ) : null}
+
           <header className="text-center">
             <h1
-              className={`text-3xl md:text-4xl lg:text-5xl font-bold  ${
+              className={`font-bold ${
+                isExtensionPopup
+                  ? "text-2xl"
+                  : "text-3xl md:text-4xl lg:text-5xl"
+              } ${
                 isAnimatedBackground
                   ? "text-white"
                   : "bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
@@ -124,22 +151,31 @@ function App() {
             </h1>
           </header>
 
-          <section className="text-center p-4 md:p-6 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl border border-primary/30">
+          <section
+            className={`text-center bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/30 ${
+              isExtensionPopup ? "p-3 rounded-xl" : "p-4 md:p-6 rounded-2xl"
+            }`}
+          >
             <ButtonED
               onClick={handleChooseColor}
               ariaLabel="Abrir seletor de cores"
               variant={isAnimatedBackground ? "white" : "primary"}
+              className={
+                isExtensionPopup
+                  ? "w-full py-2 px-4 text-base md:text-base"
+                  : undefined
+              }
             >
               Escolha uma cor
             </ButtonED>
           </section>
 
           {error ? (
-            <section className="mb-4">
+            <section className={isExtensionPopup ? "mb-2" : "mb-4"}>
               <div
-                className={`text-error text-lg md:text-xl text-center rounded-xl p-4 border border-error/30 ${
-                  isAnimatedBackground ? "bg-black/70" : "bg-error/10 "
-                }`}
+                className={`text-error text-center rounded-xl border border-error/30 ${
+                  isExtensionPopup ? "text-base p-3" : "text-lg md:text-xl p-4"
+                } ${isAnimatedBackground ? "bg-black/70" : "bg-error/10 "}`}
                 role="alert"
                 aria-live="polite"
               >
@@ -151,7 +187,11 @@ function App() {
           {!error ? (
             <div className="bg-gradient-to-r from-primary/20 to-secondary/20 border border-white/10 rounded-xl">
               <section>
-                <h2 className="text-2xl font-semibold text-white text-center p-4">
+                <h2
+                  className={`font-semibold text-white text-center ${
+                    isExtensionPopup ? "text-xl p-3" : "text-2xl p-4"
+                  }`}
+                >
                   {title}
                 </h2>
               </section>
@@ -161,11 +201,27 @@ function App() {
                   className="mb-4 md:mb-8"
                   aria-label="Cores selecionadas"
                 >
-                  <div className="flex flex-row justify-center gap-3 md:gap-6">
+                  <div
+                    className={`flex flex-row justify-center ${
+                      isExtensionPopup ? "gap-3 pb-3" : "gap-3 md:gap-6"
+                    }`}
+                  >
                     <article className="flex flex-col items-center">
-                      <h3 className="text-white text-lg">Cor atual:</h3>
+                      <h3
+                        className={
+                          isExtensionPopup
+                            ? "text-white text-base"
+                            : "text-white text-lg"
+                        }
+                      >
+                        Cor atual:
+                      </h3>
                       <div
-                        className="w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 border-primary/50 flex items-center justify-center shadow-lg shadow-primary/30"
+                        className={`rounded-lg border-2 border-primary/50 flex items-center justify-center shadow-lg shadow-primary/30 ${
+                          isExtensionPopup
+                            ? "w-[4.5rem] h-[4.5rem]"
+                            : "w-20 h-20 md:w-24 md:h-24"
+                        }`}
                         style={{
                           backgroundColor: colors.current || "transparent",
                         }}
@@ -180,9 +236,21 @@ function App() {
 
                     {colors.previous ? (
                       <article className="flex flex-col items-center">
-                        <h3 className="text-white text-lg">Cor anterior:</h3>
+                        <h3
+                          className={
+                            isExtensionPopup
+                              ? "text-white text-base"
+                              : "text-white text-lg"
+                          }
+                        >
+                          Cor anterior:
+                        </h3>
                         <div
-                          className="w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 border-secondary/50 flex items-center justify-center shadow-lg shadow-secondary/30"
+                          className={`rounded-lg border-2 border-secondary/50 flex items-center justify-center shadow-lg shadow-secondary/30 ${
+                            isExtensionPopup
+                              ? "w-[4.5rem] h-[4.5rem]"
+                              : "w-20 h-20 md:w-24 md:h-24"
+                          }`}
                           style={{ backgroundColor: colors.previous }}
                           role="img"
                           aria-label={`Cor anterior: ${colors.previous}`}
@@ -199,11 +267,20 @@ function App() {
             </div>
           ) : null}
 
-          <footer className="text-center pt-3 md:pt-6 border-t border-white/10">
+          <footer
+            className={`text-center border-t border-white/10 ${
+              isExtensionPopup ? "pt-3" : "pt-3 md:pt-6"
+            }`}
+          >
             <ButtonED
               onClick={handleClearColors}
               ariaLabel="Limpar todas as cores selecionadas"
               variant={isAnimatedBackground ? "white" : "primary"}
+              className={
+                isExtensionPopup
+                  ? "w-full py-2 px-4 text-base md:text-base"
+                  : ""
+              }
             >
               Limpar Cores
             </ButtonED>
