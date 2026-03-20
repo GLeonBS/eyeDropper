@@ -25,6 +25,7 @@ function App() {
   const [showColors, setShowColors] = useState<boolean>(false);
   const [isAnimatedBackground, setIsAnimatedBackground] =
     useState<boolean>(false);
+  const [copiedColor, setCopiedColor] = useState<"current" | "previous" | null>(null);
 
   useEffect(() => {
     if (!("EyeDropper" in window)) {
@@ -94,11 +95,32 @@ function App() {
     localStorage.setItem("backgroundType", isAnimated ? "animated" : "black");
   };
 
+  const handleCopyColor = async (
+    color: string | null,
+    source: "current" | "previous"
+  ) => {
+    if (!color) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(color);
+      setCopiedColor(source);
+      window.setTimeout(() => {
+        setCopiedColor((activeSource) =>
+          activeSource === source ? null : activeSource
+        );
+      }, 1500);
+    } catch {
+      setError("Nao foi possivel copiar a cor");
+    }
+  };
+
   return (
     <div
       className={`flex justify-center p-2 md:p-4 ${
         isExtensionPopup
-          ? "w-full min-h-[560px] items-start"
+          ? "w-full min-h-[500px] items-start"
           : "min-h-screen items-center"
       } ${isAnimatedBackground ? "animated-bg" : "black-bg"}`}
     >
@@ -121,16 +143,17 @@ function App() {
       <main
         className={`w-full bg-white/10 backdrop-blur-sm shadow-2xl border border-white/20 ${
           isExtensionPopup
-            ? "max-w-[380px] rounded-2xl p-3"
+            ? "max-w-[360px] rounded-2xl p-3"
             : "max-w-2xl rounded-3xl p-4 md:p-8"
         }`}
       >
         <article className={isExtensionPopup ? "space-y-3" : "space-y-4"}>
           {isExtensionPopup ? (
-            <section className="rounded-xl border border-white/20 bg-white/5 p-3">
+            <section className="rounded-lg border border-white/15 bg-white/5 p-2">
               <BackgroundSelectorContent
                 isAnimatedBackground={isAnimatedBackground}
                 onBackgroundChange={handleBackgroundChange}
+                compact
               />
             </section>
           ) : null}
@@ -232,6 +255,17 @@ function App() {
                           {colors.current}
                         </span>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyColor(colors.current, "current")}
+                        className={`mt-2 rounded-md border border-white/30 text-white hover:bg-white/10 transition-colors ${
+                          isExtensionPopup ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"
+                        }`}
+                        aria-label="Copiar cor atual"
+                      >
+                        {copiedColor === "current" ? "Copiado!" : "Copiar"}
+                      </button>
                     </article>
 
                     {colors.previous ? (
@@ -259,6 +293,21 @@ function App() {
                             {colors.previous}
                           </span>
                         </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleCopyColor(colors.previous, "previous")
+                          }
+                          className={`mt-2 rounded-md border border-white/30 text-white hover:bg-white/10 transition-colors ${
+                            isExtensionPopup
+                              ? "px-2 py-1 text-xs"
+                              : "px-3 py-1 text-sm"
+                          }`}
+                          aria-label="Copiar cor anterior"
+                        >
+                          {copiedColor === "previous" ? "Copiado!" : "Copiar"}
+                        </button>
                       </article>
                     ) : null}
                   </div>
@@ -285,6 +334,19 @@ function App() {
               Limpar Cores
             </ButtonED>
           </footer>
+
+          {isExtensionPopup ? (
+            <div className="text-center pt-1">
+              <a
+                href="https://gleonbs.github.io/eyeDropper/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-white/80 underline underline-offset-2 hover:text-white"
+              >
+                Abrir versao completa
+              </a>
+            </div>
+          ) : null}
         </article>
       </main>
     </div>

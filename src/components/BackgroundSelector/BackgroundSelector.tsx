@@ -3,6 +3,7 @@ import type { FC } from "react";
 interface IProps {
     isAnimatedBackground: boolean;
     onBackgroundChange: (isAnimated: boolean) => void;
+    compact?: boolean;
 };
 
 export const BackgroundSelector: FC<IProps> = ({ isAnimatedBackground, onBackgroundChange }) => {
@@ -46,7 +47,39 @@ export const BackgroundSelector: FC<IProps> = ({ isAnimatedBackground, onBackgro
 }
 
 
-export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, onBackgroundChange }) => {
+export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, onBackgroundChange, compact = false }) => {
+    if (compact) {
+        return (
+            <div className="flex items-center justify-center gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="radio"
+                        name="background-mobile"
+                        checked={isAnimatedBackground}
+                        onChange={() => onBackgroundChange(true)}
+                        className="w-4 h-4 text-primary"
+                        aria-label="Fundo animado"
+                    />
+                    <div className="w-5 h-5 rounded border border-white/40 overflow-hidden" aria-hidden="true">
+                        <div className="w-full h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
+                    </div>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="radio"
+                        name="background-mobile"
+                        checked={!isAnimatedBackground}
+                        onChange={() => onBackgroundChange(false)}
+                        className="w-4 h-4 text-primary"
+                        aria-label="Fundo preto"
+                    />
+                    <div className="w-5 h-5 rounded border border-white/40 bg-black" aria-hidden="true"></div>
+                </label>
+            </div>
+        );
+    }
+
     return (
         <div>
             <h4 className="text-white text-base font-semibold mb-3">Fundo:</h4>
