@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
     isAnimatedBackground: boolean;
@@ -7,10 +8,12 @@ interface IProps {
 };
 
 export const BackgroundSelector: FC<IProps> = ({ isAnimatedBackground, onBackgroundChange }) => {
+    const { t } = useTranslation();
+
     return (
         <div className="hidden md:block fixed top-4 right-4 z-50 bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-            <h3 className="text-white text-sm font-semibold mb-3">Fundo:</h3>
-            
+            <h3 className="text-white text-sm font-semibold mb-3">{t("background")}</h3>
+
             <div className="space-y-2">
                 <label className="flex items-center space-x-3 cursor-pointer">
                     <input
@@ -24,7 +27,7 @@ export const BackgroundSelector: FC<IProps> = ({ isAnimatedBackground, onBackgro
                         <div className="w-6 h-6 rounded border-2 border-white/30 overflow-hidden">
                             <div className="w-full h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
                         </div>
-                        <span className="text-white text-sm">Animado</span>
+                        <span className="text-white text-sm">{t("animated")}</span>
                     </div>
                 </label>
 
@@ -38,7 +41,7 @@ export const BackgroundSelector: FC<IProps> = ({ isAnimatedBackground, onBackgro
                     />
                     <div className="flex items-center space-x-2">
                         <div className="w-6 h-6 rounded border-2 border-white/30 bg-black"></div>
-                        <span className="text-white text-sm">Preto</span>
+                        <span className="text-white text-sm">{t("black")}</span>
                     </div>
                 </label>
             </div>
@@ -48,6 +51,8 @@ export const BackgroundSelector: FC<IProps> = ({ isAnimatedBackground, onBackgro
 
 
 export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, onBackgroundChange, compact = false }) => {
+    const { t } = useTranslation();
+
     if (compact) {
         return (
             <div className="flex items-center justify-center gap-4">
@@ -58,7 +63,7 @@ export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, on
                         checked={isAnimatedBackground}
                         onChange={() => onBackgroundChange(true)}
                         className="w-4 h-4 text-primary"
-                        aria-label="Fundo animado"
+                        aria-label={t("animatedBackgroundAria")}
                     />
                     <div className="w-5 h-5 rounded border border-white/40 overflow-hidden" aria-hidden="true">
                         <div className="w-full h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
@@ -72,7 +77,7 @@ export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, on
                         checked={!isAnimatedBackground}
                         onChange={() => onBackgroundChange(false)}
                         className="w-4 h-4 text-primary"
-                        aria-label="Fundo preto"
+                        aria-label={t("blackBackgroundAria")}
                     />
                     <div className="w-5 h-5 rounded border border-white/40 bg-black" aria-hidden="true"></div>
                 </label>
@@ -82,8 +87,8 @@ export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, on
 
     return (
         <div>
-            <h4 className="text-white text-base font-semibold mb-3">Fundo:</h4>
-            
+            <h4 className="text-white text-base font-semibold mb-3">{t("background")}</h4>
+
             <div className="space-y-3">
                 <label className="flex items-center space-x-4 cursor-pointer">
                     <input
@@ -97,7 +102,7 @@ export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, on
                         <div className="w-8 h-8 rounded border-2 border-white/30 overflow-hidden">
                             <div className="w-full h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
                         </div>
-                        <span className="text-white text-base">Fundo Animado</span>
+                        <span className="text-white text-base">{t("animatedBackground")}</span>
                     </div>
                 </label>
 
@@ -111,7 +116,7 @@ export const BackgroundSelectorContent: FC<IProps> = ({ isAnimatedBackground, on
                     />
                     <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 rounded border-2 border-white/30 bg-black"></div>
-                        <span className="text-white text-base">Fundo Preto</span>
+                        <span className="text-white text-base">{t("blackBackground")}</span>
                     </div>
                 </label>
             </div>

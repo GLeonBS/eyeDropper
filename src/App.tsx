@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   BackgroundSelector,
   BackgroundSelectorContent,
 } from "./components/BackgroundSelector/BackgroundSelector";
 import { ButtonED } from "./components/Button/ButtonED";
+import {
+  LanguageSelectorDesktop,
+  LanguageSelector,
+} from "./components/LanguageSelector/LanguageSelector";
 import { MobileMenu } from "./components/MobileMenu/MobileMenu";
 
 interface ColorData {
@@ -12,6 +17,7 @@ interface ColorData {
 }
 
 function App() {
+  const { t } = useTranslation();
   const isExtensionPopup = window.location.protocol === "chrome-extension:";
 
   const [colors, setColors] = useState<ColorData>({
@@ -19,9 +25,7 @@ function App() {
     previous: null,
   });
   const [error, setError] = useState<string>("");
-  const [title, setTitle] = useState<string>(
-    "Ainda não tem nenhuma cor selecionada :/",
-  );
+  const [title, setTitle] = useState<string>("noColorSelected");
   const [showColors, setShowColors] = useState<boolean>(false);
   const [isAnimatedBackground, setIsAnimatedBackground] =
     useState<boolean>(false);
@@ -29,7 +33,7 @@ function App() {
 
   useEffect(() => {
     if (!("EyeDropper" in window)) {
-      setError("Error: Seu navegador ainda não suporta a aplicação :/");
+      setError("browserNotSupported");
       setTitle("");
       return;
     }
@@ -43,7 +47,7 @@ function App() {
         current: savedCurrent,
         previous: savedPrevious,
       });
-      setTitle("Cores:");
+      setTitle("colorsTitle");
       setShowColors(true);
     }
 
@@ -63,7 +67,7 @@ function App() {
       };
 
       setColors(newColors);
-      setTitle("Cores:");
+      setTitle("colorsTitle");
       setShowColors(true);
       setError("");
 
@@ -72,17 +76,17 @@ function App() {
         localStorage.setItem("corAnterior", colors.current);
       }
     } catch {
-      setError("Erro ao selecionar cor");
+      setError("colorSelectionError");
     }
   };
 
   const handleClearColors = () => {
     if (!colors.current && !colors.previous) {
-      setTitle("Você não tem cores para apagar ヾ( ･`⌓´･)ﾉﾞ");
+      setTitle("noColorsToDelete");
       return;
     }
 
-    setTitle("Você apagou as cores :/");
+    setTitle("colorsCleared");
     setColors({ current: null, previous: null });
     setShowColors(false);
 
@@ -112,7 +116,7 @@ function App() {
         );
       }, 1500);
     } catch {
-      setError("Nao foi possivel copiar a cor");
+      setError("copyError");
     }
   };
 
@@ -131,12 +135,15 @@ function App() {
         />
       ) : null}
 
+      {!isExtensionPopup ? <LanguageSelectorDesktop /> : null}
+
       {!isExtensionPopup ? (
         <MobileMenu>
           <BackgroundSelectorContent
             isAnimatedBackground={isAnimatedBackground}
             onBackgroundChange={handleBackgroundChange}
           />
+          <LanguageSelector />
         </MobileMenu>
       ) : null}
 
@@ -149,12 +156,13 @@ function App() {
       >
         <article className={isExtensionPopup ? "space-y-3" : "space-y-4"}>
           {isExtensionPopup ? (
-            <section className="rounded-lg border border-white/15 bg-white/5 p-2">
+            <section className="rounded-lg border border-white/15 bg-white/5 p-2 space-y-2">
               <BackgroundSelectorContent
                 isAnimatedBackground={isAnimatedBackground}
                 onBackgroundChange={handleBackgroundChange}
                 compact
               />
+              <LanguageSelector compact />
             </section>
           ) : null}
 
@@ -170,7 +178,7 @@ function App() {
                   : "bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
               }`}
             >
-              Clique e Selecione uma Cor
+              {t("clickAndSelect")}
             </h1>
           </header>
 
@@ -181,7 +189,7 @@ function App() {
           >
             <ButtonED
               onClick={handleChooseColor}
-              ariaLabel="Abrir seletor de cores"
+              ariaLabel={t("openColorPicker")}
               variant={isAnimatedBackground ? "white" : "primary"}
               className={
                 isExtensionPopup
@@ -189,7 +197,7 @@ function App() {
                   : undefined
               }
             >
-              Escolha uma cor
+              {t("chooseColor")}
             </ButtonED>
           </section>
 
@@ -202,7 +210,7 @@ function App() {
                 role="alert"
                 aria-live="polite"
               >
-                {error}
+                {t(error)}
               </div>
             </section>
           ) : null}
@@ -215,14 +223,14 @@ function App() {
                     isExtensionPopup ? "text-xl p-3" : "text-2xl p-4"
                   }`}
                 >
-                  {title}
+                  {title ? t(title) : ""}
                 </h2>
               </section>
 
               {showColors && (
                 <section
                   className="mb-4 md:mb-8"
-                  aria-label="Cores selecionadas"
+                  aria-label={t("selectedColors")}
                 >
                   <div
                     className={`flex flex-row justify-center ${
@@ -237,7 +245,7 @@ function App() {
                             : "text-white text-lg"
                         }
                       >
-                        Cor atual:
+                        {t("currentColor")}
                       </h3>
                       <div
                         className={`rounded-lg border-2 border-primary/50 flex items-center justify-center shadow-lg shadow-primary/30 ${
@@ -249,7 +257,7 @@ function App() {
                           backgroundColor: colors.current || "transparent",
                         }}
                         role="img"
-                        aria-label={`Cor atual: ${colors.current}`}
+                        aria-label={t("currentColorAria", { color: colors.current })}
                       >
                         <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">
                           {colors.current}
@@ -262,9 +270,9 @@ function App() {
                         className={`mt-2 rounded-md border border-white/30 text-white hover:bg-white/10 transition-colors ${
                           isExtensionPopup ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"
                         }`}
-                        aria-label="Copiar cor atual"
+                        aria-label={t("copyCurrentColor")}
                       >
-                        {copiedColor === "current" ? "Copiado!" : "Copiar"}
+                        {copiedColor === "current" ? t("copied") : t("copy")}
                       </button>
                     </article>
 
@@ -277,7 +285,7 @@ function App() {
                               : "text-white text-lg"
                           }
                         >
-                          Cor anterior:
+                          {t("previousColor")}
                         </h3>
                         <div
                           className={`rounded-lg border-2 border-secondary/50 flex items-center justify-center shadow-lg shadow-secondary/30 ${
@@ -287,7 +295,7 @@ function App() {
                           }`}
                           style={{ backgroundColor: colors.previous }}
                           role="img"
-                          aria-label={`Cor anterior: ${colors.previous}`}
+                          aria-label={t("previousColorAria", { color: colors.previous })}
                         >
                           <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">
                             {colors.previous}
@@ -304,9 +312,9 @@ function App() {
                               ? "px-2 py-1 text-xs"
                               : "px-3 py-1 text-sm"
                           }`}
-                          aria-label="Copiar cor anterior"
+                          aria-label={t("copyPreviousColor")}
                         >
-                          {copiedColor === "previous" ? "Copiado!" : "Copiar"}
+                          {copiedColor === "previous" ? t("copied") : t("copy")}
                         </button>
                       </article>
                     ) : null}
@@ -323,7 +331,7 @@ function App() {
           >
             <ButtonED
               onClick={handleClearColors}
-              ariaLabel="Limpar todas as cores selecionadas"
+              ariaLabel={t("clearAllColors")}
               variant={isAnimatedBackground ? "white" : "primary"}
               className={
                 isExtensionPopup
@@ -331,7 +339,7 @@ function App() {
                   : ""
               }
             >
-              Limpar Cores
+              {t("clearColors")}
             </ButtonED>
           </footer>
 
@@ -343,7 +351,7 @@ function App() {
                 rel="noreferrer"
                 className="text-xs text-white/80 underline underline-offset-2 hover:text-white"
               >
-                Abrir versao completa
+                {t("openFullVersion")}
               </a>
             </div>
           ) : null}
