@@ -5,6 +5,7 @@ import {
   BackgroundSelectorContent,
 } from "./components/BackgroundSelector/BackgroundSelector";
 import { ButtonED } from "./components/Button/ButtonED";
+import { ColorCard } from "./components/ColorCard/ColorCard";
 import {
   LanguageSelectorDesktop,
   LanguageSelector,
@@ -99,13 +100,21 @@ function App() {
     localStorage.setItem("backgroundType", isAnimated ? "animated" : "black");
   };
 
+  const handleColorChange = (source: "current" | "previous", newColor: string) => {
+    const updated = { ...colors, [source]: newColor };
+    setColors(updated);
+    if (source === "current") {
+      localStorage.setItem("corSelecionada", newColor);
+    } else {
+      localStorage.setItem("corAnterior", newColor);
+    }
+  };
+
   const handleCopyColor = async (
     color: string | null,
     source: "current" | "previous"
   ) => {
-    if (!color) {
-      return;
-    }
+    if (!color) return;
 
     try {
       await navigator.clipboard.writeText(color);
@@ -227,96 +236,42 @@ function App() {
                 </h2>
               </section>
 
-              {showColors && (
+              {showColors && colors.current && (
                 <section
                   className="mb-4 md:mb-8"
                   aria-label={t("selectedColors")}
                 >
                   <div
                     className={`flex flex-row justify-center ${
-                      isExtensionPopup ? "gap-3 pb-3" : "gap-3 md:gap-6"
+                      isExtensionPopup ? "gap-4 pb-3 px-2" : "gap-6 md:gap-10"
                     }`}
                   >
-                    <article className="flex flex-col items-center">
-                      <h3
-                        className={
-                          isExtensionPopup
-                            ? "text-white text-base"
-                            : "text-white text-lg"
-                        }
-                      >
-                        {t("currentColor")}
-                      </h3>
-                      <div
-                        className={`rounded-lg border-2 border-primary/50 flex items-center justify-center shadow-lg shadow-primary/30 ${
-                          isExtensionPopup
-                            ? "w-[4.5rem] h-[4.5rem]"
-                            : "w-20 h-20 md:w-24 md:h-24"
-                        }`}
-                        style={{
-                          backgroundColor: colors.current || "transparent",
-                        }}
-                        role="img"
-                        aria-label={t("currentColorAria", { color: colors.current })}
-                      >
-                        <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">
-                          {colors.current}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleCopyColor(colors.current, "current")}
-                        className={`mt-2 rounded-md border border-white/30 text-white hover:bg-white/10 transition-colors ${
-                          isExtensionPopup ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"
-                        }`}
-                        aria-label={t("copyCurrentColor")}
-                      >
-                        {copiedColor === "current" ? t("copied") : t("copy")}
-                      </button>
-                    </article>
+                    <ColorCard
+                      color={colors.current}
+                      label={t("currentColor")}
+                      colorAriaLabel={t("currentColorAria", { color: colors.current })}
+                      copyAriaLabel={t("copyCurrentColor")}
+                      onColorChange={(c) => handleColorChange("current", c)}
+                      onCopy={() => handleCopyColor(colors.current, "current")}
+                      copied={copiedColor === "current"}
+                      compact={isExtensionPopup}
+                      borderClass="border-primary/50"
+                      shadowClass="shadow-lg shadow-primary/30"
+                    />
 
                     {colors.previous ? (
-                      <article className="flex flex-col items-center">
-                        <h3
-                          className={
-                            isExtensionPopup
-                              ? "text-white text-base"
-                              : "text-white text-lg"
-                          }
-                        >
-                          {t("previousColor")}
-                        </h3>
-                        <div
-                          className={`rounded-lg border-2 border-secondary/50 flex items-center justify-center shadow-lg shadow-secondary/30 ${
-                            isExtensionPopup
-                              ? "w-[4.5rem] h-[4.5rem]"
-                              : "w-20 h-20 md:w-24 md:h-24"
-                          }`}
-                          style={{ backgroundColor: colors.previous }}
-                          role="img"
-                          aria-label={t("previousColorAria", { color: colors.previous })}
-                        >
-                          <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">
-                            {colors.previous}
-                          </span>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleCopyColor(colors.previous, "previous")
-                          }
-                          className={`mt-2 rounded-md border border-white/30 text-white hover:bg-white/10 transition-colors ${
-                            isExtensionPopup
-                              ? "px-2 py-1 text-xs"
-                              : "px-3 py-1 text-sm"
-                          }`}
-                          aria-label={t("copyPreviousColor")}
-                        >
-                          {copiedColor === "previous" ? t("copied") : t("copy")}
-                        </button>
-                      </article>
+                      <ColorCard
+                        color={colors.previous}
+                        label={t("previousColor")}
+                        colorAriaLabel={t("previousColorAria", { color: colors.previous })}
+                        copyAriaLabel={t("copyPreviousColor")}
+                        onColorChange={(c) => handleColorChange("previous", c)}
+                        onCopy={() => handleCopyColor(colors.previous, "previous")}
+                        copied={copiedColor === "previous"}
+                        compact={isExtensionPopup}
+                        borderClass="border-secondary/50"
+                        shadowClass="shadow-lg shadow-secondary/30"
+                      />
                     ) : null}
                   </div>
                 </section>

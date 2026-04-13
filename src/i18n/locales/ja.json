@@ -31,5 +31,6 @@
   "openMenu": "メニューを開く",
   "settings": "設定",
   "closeMenu": "メニューを閉じる",
-  "language": "言語:"
+  "language": "言語:",
+  "editColor": "色を編集"
 }
