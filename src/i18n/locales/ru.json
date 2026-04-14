@@ -31,5 +31,6 @@
   "openMenu": "Открыть меню",
   "settings": "Настройки",
   "closeMenu": "Закрыть меню",
-  "language": "Язык:"
+  "language": "Язык:",
+  "editColor": "Редактировать цвет"
 }
