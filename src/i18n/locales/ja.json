@@ -32,5 +32,14 @@
   "settings": "設定",
   "closeMenu": "メニューを閉じる",
   "language": "言語:",
-  "editColor": "色を編集"
+  "editColor": "色を編集",
+  "alpha": "不透明度",
+  "colorHistory": "履歴",
+  "clearHistory": "履歴を消去",
+  "useColor": "この色を使用",
+  "exportPalette": "パレットをエクスポート",
+  "cssVars": "CSS変数",
+  "copyExport": "コピー",
+  "exportCopied": "コピーしました!",
+  "close": "閉じる"
 }

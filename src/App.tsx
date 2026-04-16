@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BackgroundSelector,
@@ -6,11 +6,15 @@ import {
 } from "./components/BackgroundSelector/BackgroundSelector";
 import { ButtonED } from "./components/Button/ButtonED";
 import { ColorCard } from "./components/ColorCard/ColorCard";
+import { ColorHistory } from "./components/ColorHistory/ColorHistory";
+import { ExportPalette } from "./components/ExportPalette/ExportPalette";
 import {
   LanguageSelectorDesktop,
   LanguageSelector,
 } from "./components/LanguageSelector/LanguageSelector";
 import { MobileMenu } from "./components/MobileMenu/MobileMenu";
+
+const MAX_HISTORY = 10;
 
 interface ColorData {
   current: string | null;
@@ -21,16 +25,12 @@ function App() {
   const { t } = useTranslation();
   const isExtensionPopup = window.location.protocol === "chrome-extension:";
 
-  const [colors, setColors] = useState<ColorData>({
-    current: null,
-    previous: null,
-  });
+  const [colors, setColors] = useState<ColorData>({ current: null, previous: null });
+  const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
   const [title, setTitle] = useState<string>("noColorSelected");
   const [showColors, setShowColors] = useState<boolean>(false);
-  const [isAnimatedBackground, setIsAnimatedBackground] =
-    useState<boolean>(false);
-  const [copiedColor, setCopiedColor] = useState<"current" | "previous" | null>(null);
+  const [isAnimatedBackground, setIsAnimatedBackground] = useState<boolean>(false);
 
   useEffect(() => {
     if (!("EyeDropper" in window)) {
@@ -42,40 +42,41 @@ function App() {
     const savedCurrent = localStorage.getItem("corSelecionada");
     const savedPrevious = localStorage.getItem("corAnterior");
     const savedBackground = localStorage.getItem("backgroundType");
+    const savedHistory = localStorage.getItem("colorHistory");
 
     if (savedCurrent) {
-      setColors({
-        current: savedCurrent,
-        previous: savedPrevious,
-      });
+      setColors({ current: savedCurrent, previous: savedPrevious });
       setTitle("colorsTitle");
       setShowColors(true);
     }
-
     if (savedBackground) {
       setIsAnimatedBackground(savedBackground === "animated");
     }
+    if (savedHistory) {
+      try { setHistory(JSON.parse(savedHistory)); } catch { /* ignore */ }
+    }
+  }, []);
+
+  const addToHistory = useCallback((color: string) => {
+    setHistory((prev) => {
+      const next = [color, ...prev.filter((c) => c !== color)].slice(0, MAX_HISTORY);
+      localStorage.setItem("colorHistory", JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   const handleChooseColor = async () => {
     try {
       const dropper = new EyeDropper();
       const result = await dropper.open();
-
-      const newColors = {
-        current: result.sRGBHex,
-        previous: colors.current,
-      };
-
+      const newColors = { current: result.sRGBHex, previous: colors.current };
       setColors(newColors);
       setTitle("colorsTitle");
       setShowColors(true);
       setError("");
-
       localStorage.setItem("corSelecionada", result.sRGBHex);
-      if (colors.current) {
-        localStorage.setItem("corAnterior", colors.current);
-      }
+      if (colors.current) localStorage.setItem("corAnterior", colors.current);
+      addToHistory(result.sRGBHex);
     } catch {
       setError("colorSelectionError");
     }
@@ -86,11 +87,9 @@ function App() {
       setTitle("noColorsToDelete");
       return;
     }
-
     setTitle("colorsCleared");
     setColors({ current: null, previous: null });
     setShowColors(false);
-
     localStorage.removeItem("corSelecionada");
     localStorage.removeItem("corAnterior");
   };
@@ -101,32 +100,25 @@ function App() {
   };
 
   const handleColorChange = (source: "current" | "previous", newColor: string) => {
-    const updated = { ...colors, [source]: newColor };
-    setColors(updated);
-    if (source === "current") {
-      localStorage.setItem("corSelecionada", newColor);
-    } else {
-      localStorage.setItem("corAnterior", newColor);
-    }
+    setColors((prev) => ({ ...prev, [source]: newColor }));
+    localStorage.setItem(
+      source === "current" ? "corSelecionada" : "corAnterior",
+      newColor,
+    );
   };
 
-  const handleCopyColor = async (
-    color: string | null,
-    source: "current" | "previous"
-  ) => {
-    if (!color) return;
+  const handleUseFromHistory = (color: string) => {
+    const prev = colors.current;
+    setColors({ current: color, previous: prev });
+    setTitle("colorsTitle");
+    setShowColors(true);
+    localStorage.setItem("corSelecionada", color);
+    if (prev) localStorage.setItem("corAnterior", prev);
+  };
 
-    try {
-      await navigator.clipboard.writeText(color);
-      setCopiedColor(source);
-      window.setTimeout(() => {
-        setCopiedColor((activeSource) =>
-          activeSource === source ? null : activeSource
-        );
-      }, 1500);
-    } catch {
-      setError("copyError");
-    }
+  const handleClearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem("colorHistory");
   };
 
   return (
@@ -178,9 +170,7 @@ function App() {
           <header className="text-center">
             <h1
               className={`font-bold ${
-                isExtensionPopup
-                  ? "text-2xl"
-                  : "text-3xl md:text-4xl lg:text-5xl"
+                isExtensionPopup ? "text-2xl" : "text-3xl md:text-4xl lg:text-5xl"
               } ${
                 isAnimatedBackground
                   ? "text-white"
@@ -201,9 +191,7 @@ function App() {
               ariaLabel={t("openColorPicker")}
               variant={isAnimatedBackground ? "white" : "primary"}
               className={
-                isExtensionPopup
-                  ? "w-full py-2 px-4 text-base md:text-base"
-                  : undefined
+                isExtensionPopup ? "w-full py-2 px-4 text-base md:text-base" : undefined
               }
             >
               {t("chooseColor")}
@@ -215,7 +203,7 @@ function App() {
               <div
                 className={`text-error text-center rounded-xl border border-error/30 ${
                   isExtensionPopup ? "text-base p-3" : "text-lg md:text-xl p-4"
-                } ${isAnimatedBackground ? "bg-black/70" : "bg-error/10 "}`}
+                } ${isAnimatedBackground ? "bg-black/70" : "bg-error/10"}`}
                 role="alert"
                 aria-live="polite"
               >
@@ -238,22 +226,20 @@ function App() {
 
               {showColors && colors.current && (
                 <section
-                  className="mb-4 md:mb-8"
+                  className={`${isExtensionPopup ? "pb-3" : "mb-4 md:mb-6"}`}
                   aria-label={t("selectedColors")}
                 >
                   <div
                     className={`flex flex-row justify-center ${
-                      isExtensionPopup ? "gap-4 pb-3 px-2" : "gap-6 md:gap-10"
+                      isExtensionPopup ? "gap-4 px-2" : "gap-6 md:gap-10"
                     }`}
                   >
                     <ColorCard
                       color={colors.current}
                       label={t("currentColor")}
                       colorAriaLabel={t("currentColorAria", { color: colors.current })}
-                      copyAriaLabel={t("copyCurrentColor")}
                       onColorChange={(c) => handleColorChange("current", c)}
-                      onCopy={() => handleCopyColor(colors.current, "current")}
-                      copied={copiedColor === "current"}
+                      onError={setError}
                       compact={isExtensionPopup}
                       borderClass="border-primary/50"
                       shadowClass="shadow-lg shadow-primary/30"
@@ -264,16 +250,21 @@ function App() {
                         color={colors.previous}
                         label={t("previousColor")}
                         colorAriaLabel={t("previousColorAria", { color: colors.previous })}
-                        copyAriaLabel={t("copyPreviousColor")}
                         onColorChange={(c) => handleColorChange("previous", c)}
-                        onCopy={() => handleCopyColor(colors.previous, "previous")}
-                        copied={copiedColor === "previous"}
+                        onError={setError}
                         compact={isExtensionPopup}
                         borderClass="border-secondary/50"
                         shadowClass="shadow-lg shadow-secondary/30"
                       />
                     ) : null}
                   </div>
+
+                  <ColorHistory
+                    history={history}
+                    onUseColor={handleUseFromHistory}
+                    onClear={handleClearHistory}
+                    compact={isExtensionPopup}
+                  />
                 </section>
               )}
             </div>
@@ -281,7 +272,7 @@ function App() {
 
           <footer
             className={`text-center border-t border-white/10 ${
-              isExtensionPopup ? "pt-3" : "pt-3 md:pt-6"
+              isExtensionPopup ? "pt-3 space-y-2" : "pt-3 md:pt-4 space-y-3"
             }`}
           >
             <ButtonED
@@ -289,13 +280,13 @@ function App() {
               ariaLabel={t("clearAllColors")}
               variant={isAnimatedBackground ? "white" : "primary"}
               className={
-                isExtensionPopup
-                  ? "w-full py-2 px-4 text-base md:text-base"
-                  : ""
+                isExtensionPopup ? "w-full py-2 px-4 text-base md:text-base" : ""
               }
             >
               {t("clearColors")}
             </ButtonED>
+
+            <ExportPalette colors={history} />
           </footer>
 
           {isExtensionPopup ? (
