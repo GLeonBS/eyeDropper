@@ -32,5 +32,14 @@
   "settings": "Settings",
   "closeMenu": "Close menu",
   "language": "Language:",
-  "editColor": "Edit color"
+  "editColor": "Edit color",
+  "alpha": "Alpha",
+  "colorHistory": "History",
+  "clearHistory": "Clear history",
+  "useColor": "Use this color",
+  "exportPalette": "Export Palette",
+  "cssVars": "CSS Vars",
+  "copyExport": "Copy",
+  "exportCopied": "Copied!",
+  "close": "Close"
 }

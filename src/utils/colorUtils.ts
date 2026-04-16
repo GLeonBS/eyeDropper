@@ -1,5 +1,7 @@
 export interface RGB { r: number; g: number; b: number }
 export interface HSL { h: number; s: number; l: number }
+export type ColorFormat = "hex" | "rgb" | "rgba" | "hsl";
+export type ExportFormat = "css" | "scss" | "json" | "tailwind";
 
 export function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -79,4 +81,32 @@ export function hslToRgb(h: number, s: number, l: number): RGB {
 
 export function isValidHex(hex: string): boolean {
   return /^#[0-9a-fA-F]{6}$/.test(hex);
+}
+
+export function formatColor(hex: string, format: ColorFormat, alpha = 1): string {
+  const rgb = hexToRgb(hex) ?? { r: 0, g: 0, b: 0 };
+  const a = parseFloat(Math.max(0, Math.min(1, alpha)).toFixed(2));
+  switch (format) {
+    case "hex":  return hex;
+    case "rgb":  return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+    case "rgba": return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
+    case "hsl": {
+      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+      return `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+    }
+  }
+}
+
+export function generateExport(colors: string[], format: ExportFormat): string {
+  if (colors.length === 0) return "";
+  switch (format) {
+    case "css":
+      return `:root {\n${colors.map((c, i) => `  --color-${i + 1}: ${c};`).join("\n")}\n}`;
+    case "scss":
+      return colors.map((c, i) => `$color-${i + 1}: ${c};`).join("\n");
+    case "json":
+      return JSON.stringify(colors, null, 2);
+    case "tailwind":
+      return `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n${colors.map((c, i) => `        "color-${i + 1}": "${c}",`).join("\n")}\n      },\n    },\n  },\n};`;
+  }
 }
