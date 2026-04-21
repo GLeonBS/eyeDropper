@@ -1,9 +1,7 @@
 name: Build and Publish Chrome Extension
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -36,11 +34,6 @@ jobs:
           cd dist-extension
           zip -r ../extension.zip .
           cd ..
-
-      - name: Upload extension to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: extension.zip
 
       - name: Publish to Chrome Web Store
         if: ${{ env.CHROME_EXTENSION_ID != '' }}
